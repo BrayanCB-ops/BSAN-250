@@ -1,0 +1,34 @@
+const defaultClasses = [
+  { name: 'Business Systems', code: 'BSN-250', color: '#e97762', grade: 92 },
+  { name: 'Data Analytics', code: 'DAT-310', color: '#265dce', grade: 88 },
+  { name: 'Marketing Strategy', code: 'MKT-205', color: '#d79e38', grade: 84 },
+  { name: 'Professional Writing', code: 'ENG-220', color: '#6ba883', grade: 86 }
+];
+const defaultAssignments = [
+  { id: 1, name: 'Case study: Digital transformation', classCode: 'BSN-250', due: '2024-10-17', status: 'soon', grade: '', hours: 3 },
+  { id: 2, name: 'SQL data cleaning lab', classCode: 'DAT-310', due: '2024-10-18', status: 'soon', grade: '', hours: 2 },
+  { id: 3, name: 'Campaign positioning brief', classCode: 'MKT-205', due: '2024-10-21', status: 'planned', grade: '', hours: 3 },
+  { id: 4, name: 'Reading response: The long game', classCode: 'ENG-220', due: '2024-10-23', status: 'planned', grade: '', hours: 2 },
+  { id: 5, name: 'Systems proposal draft', classCode: 'BSN-250', due: '2024-10-12', status: 'completed', grade: '94', hours: 4 }
+];
+let classes = JSON.parse(localStorage.getItem('coursework-classes') || 'null') || defaultClasses;
+let assignments = JSON.parse(localStorage.getItem('coursework-assignments') || 'null') || defaultAssignments;
+let currentFilter = 'all';
+const $ = (selector) => document.querySelector(selector);
+const save = () => { localStorage.setItem('coursework-classes', JSON.stringify(classes)); localStorage.setItem('coursework-assignments', JSON.stringify(assignments)); };
+const classFor = (code) => classes.find((item) => item.code === code) || { name: code, code, color: '#9aa09e' };
+const formatDate = (date) => new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+function renderClasses() { $('#courseList').innerHTML = classes.map((item, index) => `<div class="course ${index === 0 ? 'current' : ''}"><span class="course-color" style="background:${item.color}"></span><span>${item.name}</span><span class="course-code">${item.code}</span></div>`).join(''); $('#assignmentClass').innerHTML = classes.map((item) => `<option value="${item.code}">${item.name} (${item.code})</option>`).join(''); }
+function renderGrades() { $('#gradeList').innerHTML = classes.map((item) => `<div class="grade-row"><span class="grade-badge" style="background:${item.color}22;color:${item.color}">${item.code.split('-')[0]}</span><div class="grade-info"><strong>${item.name}</strong><small>${assignments.filter((a) => a.classCode === item.code).length} assignments</small><div class="progress"><span style="width:${item.grade}%"></span></div></div><span class="grade-percent">${item.grade}%</span></div>`).join(''); }
+function renderAssignments() { const visible = assignments.filter((item) => currentFilter === 'all' || (currentFilter === 'soon' ? item.status === 'soon' : item.status === 'completed')); $('#assignmentList').innerHTML = visible.map((item) => { const course = classFor(item.classCode); return `<div class="assignment-row" data-id="${item.id}"><div class="assignment-name">${item.name}<small>${item.hours} estimated hours</small></div><div class="class-name">${course.code}</div><div class="due-date ${item.status === 'soon' ? 'soon' : ''}">${formatDate(item.due)}</div><span class="status ${item.status}">${item.status === 'completed' ? 'Completed' : item.status === 'soon' ? 'Due soon' : 'Planned'}</span><input class="grade-input" data-grade="${item.id}" value="${item.grade}" placeholder="—" aria-label="Grade for ${item.name}"><button class="row-delete" data-delete="${item.id}" aria-label="Delete ${item.name}">×</button></div>`; }).join(''); $('#emptyState').hidden = visible.length > 0; $('#dueCount').textContent = assignments.filter((a) => a.status !== 'completed').length; $('#allCount').textContent = assignments.length; $('#soonCount').textContent = assignments.filter((a) => a.status === 'soon').length; $('#lateTasks').textContent = `${assignments.filter((a) => a.status === 'soon').length} tasks`; $('#plannedTasks').textContent = `${assignments.filter((a) => a.status !== 'completed').length + 3} tasks`; const completed = assignments.filter((a) => a.status === 'completed').length; $('#completionRate').textContent = `${Math.round((18 + completed - 1) / (23 + assignments.length - 1) * 100)}%`; }
+function toast(message) { const element = $('#toast'); element.textContent = message; element.classList.add('show'); setTimeout(() => element.classList.remove('show'), 2200); }
+$('#assignmentList').addEventListener('change', (event) => { if (!event.target.dataset.grade) return; const item = assignments.find((a) => a.id === Number(event.target.dataset.grade)); item.grade = event.target.value; if (item.grade && item.status !== 'completed') item.status = 'completed'; save(); renderAssignments(); toast('Grade saved'); });
+$('#assignmentList').addEventListener('click', (event) => { const id = Number(event.target.dataset.delete); if (!id) return; assignments = assignments.filter((item) => item.id !== id); save(); renderAssignments(); toast('Assignment removed'); });
+document.querySelectorAll('.filter').forEach((button) => button.addEventListener('click', () => { currentFilter = button.dataset.filter; document.querySelectorAll('.filter').forEach((item) => item.classList.toggle('active', item === button)); renderAssignments(); }));
+$('#addAssignmentBtn').addEventListener('click', () => { $('#assignmentDue').value = '2024-10-25'; $('#assignmentDialog').showModal(); });
+$('#assignmentForm').addEventListener('submit', (event) => { event.preventDefault(); assignments.unshift({ id: Date.now(), name: $('#assignmentName').value, classCode: $('#assignmentClass').value, due: $('#assignmentDue').value, status: 'planned', grade: '', hours: Number($('#assignmentHours').value) }); save(); renderAssignments(); $('#assignmentForm').reset(); $('#assignmentDialog').close(); toast('Assignment added'); });
+$('#addClassBtn').addEventListener('click', () => $('#classDialog').showModal());
+$('#classForm').addEventListener('submit', (event) => { event.preventDefault(); const code = $('#classCode').value.toUpperCase(); classes.push({ name: $('#className').value, code, color: '#6ba883', grade: 0 }); save(); renderClasses(); renderGrades(); $('#classForm').reset(); $('#classDialog').close(); toast('Class added'); });
+$('#exportBtn').addEventListener('click', () => { const data = `Coursework export\n\n${assignments.map((a) => `${a.name} | ${a.classCode} | ${a.due} | ${a.status} | ${a.grade || 'Not graded'}`).join('\n')}`; const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([data], { type: 'text/plain' })); link.download = 'coursework-export.txt'; link.click(); toast('Export downloaded'); });
+$('#gradeViewBtn').addEventListener('click', () => document.querySelector('#assignments').scrollIntoView({ behavior: 'smooth' }));
+renderClasses(); renderGrades(); renderAssignments();

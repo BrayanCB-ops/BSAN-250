@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f2ea">
+  <title>Coursework | Class workload manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">C</span><span>Coursework</span></div>
+      <nav aria-label="Main navigation">
+        <a class="nav-item active" href="#overview"><span class="nav-icon">⌂</span> Overview</a>
+        <a class="nav-item" href="#assignments"><span class="nav-icon">□</span> Assignments <span class="nav-count">5</span></a>
+        <a class="nav-item" href="#grades"><span class="nav-icon">◒</span> Gradebook</a>
+      </nav>
+      <div class="course-section">
+        <div class="section-label"><span>YOUR CLASSES</span><button class="icon-button" id="addClassBtn" title="Add a class" aria-label="Add a class">+</button></div>
+        <div id="courseList"></div>
+      </div>
+      <div class="sidebar-bottom"><div class="profile-avatar">JD</div><div><strong>Jordan Davis</strong><span>Fall semester</span></div><button class="more-button" aria-label="More account options">•••</button></div>
+    </aside>
+
+    <main class="main-content" id="overview">
+      <header class="topbar"><div><p class="eyebrow">Wednesday, October 16, 2024</p><h1>Good morning, Jordan <span>✦</span></h1></div><div class="top-actions"><button class="outline-button" id="exportBtn">↥ <span>Export</span></button><button class="primary-button" id="addAssignmentBtn">+ <span>Add assignment</span></button></div></header>
+      <section class="summary-grid" aria-label="Semester summary">
+        <article class="stat-card warm"><div class="stat-heading"><span>ASSIGNMENTS DUE</span><span class="stat-symbol">◷</span></div><strong id="dueCount">5</strong><p><b class="coral-text">2 due soon</b> across your classes</p></article>
+        <article class="stat-card cool"><div class="stat-heading"><span>OVERALL AVERAGE</span><span class="stat-symbol">↗</span></div><strong id="overallGrade">87.4%</strong><p><b class="green-text">+2.1%</b> from last month</p></article>
+        <article class="stat-card mint"><div class="stat-heading"><span>COMPLETION RATE</span><span class="stat-symbol">✓</span></div><strong id="completionRate">76%</strong><p><b class="green-text">18 completed</b> of 23 total</p></article>
+      </section>
+      <div class="content-grid">
+        <section class="panel workload-panel">
+          <div class="panel-header"><div><p class="eyebrow">THIS WEEK</p><h2>Your workload</h2></div><button class="text-button" id="weekBtn">This week⌄</button></div>
+          <div class="workload-visual"><div class="donut-chart"><div><strong id="hoursValue">14</strong><span>hours left</span></div></div><div class="workload-legend"><div><span class="legend-dot blue"></span><div><strong id="plannedTasks">8 tasks</strong><small>Planned</small></div></div><div><span class="legend-dot coral"></span><div><strong id="lateTasks">2 tasks</strong><small>Due soon</small></div></div><div><span class="legend-dot pale"></span><div><strong>4 hours</strong><small>Completed</small></div></div></div></div>
+          <div class="week-bars" aria-label="Workload by day"><div class="bar-day"><div class="bar-track"><span style="height:42%"></span></div><small>Mon</small></div><div class="bar-day"><div class="bar-track"><span style="height:66%"></span></div><small>Tue</small></div><div class="bar-day today"><div class="bar-track"><span style="height:84%"></span></div><small>Wed</small></div><div class="bar-day"><div class="bar-track"><span style="height:48%"></span></div><small>Thu</small></div><div class="bar-day"><div class="bar-track"><span style="height:72%"></span></div><small>Fri</small></div><div class="bar-day"><div class="bar-track"><span style="height:24%"></span></div><small>Sat</small></div><div class="bar-day"><div class="bar-track"><span style="height:15%"></span></div><small>Sun</small></div></div>
+        </section>
+        <section class="panel grade-panel" id="grades">
+          <div class="panel-header"><div><p class="eyebrow">GRADE PULSE</p><h2>By class</h2></div><button class="text-button" id="gradeViewBtn">View gradebook →</button></div>
+          <div class="grade-list" id="gradeList"></div>
+          <div class="grade-note"><span>✦</span><p>Your average is <b>2.1% higher</b> than last month. Keep it up!</p></div>
+        </section>
+      </div>
+      <section class="panel assignments-panel" id="assignments">
+        <div class="panel-header assignments-heading"><div><p class="eyebrow">UP NEXT</p><h2>Assignments</h2></div><div class="filter-row"><button class="filter active" data-filter="all">All <span id="allCount">5</span></button><button class="filter" data-filter="soon">Due soon <span id="soonCount">2</span></button><button class="filter" data-filter="done">Completed</button></div></div>
+        <div class="assignment-table-head"><span>ASSIGNMENT</span><span>CLASS</span><span>DUE DATE</span><span>STATUS</span><span>GRADE</span><span></span></div>
+        <div id="assignmentList"></div><div class="empty-state" id="emptyState" hidden>No assignments match this filter.</div>
+      </section>
+      <footer>Coursework <span>•</span> Your academic command center</footer>
+    </main>
+  </div>
+  <dialog id="assignmentDialog"><form method="dialog" id="assignmentForm"><div class="dialog-header"><div><p class="eyebrow">NEW ENTRY</p><h2>Add assignment</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div><label>Assignment name<input id="assignmentName" required placeholder="e.g. Research outline"></label><label>Class<select id="assignmentClass"></select></label><div class="form-row"><label>Due date<input id="assignmentDue" type="date" required></label><label>Estimated hours<input id="assignmentHours" type="number" min="0.5" step="0.5" value="2"></label></div><div class="dialog-actions"><button class="outline-button" value="cancel">Cancel</button><button class="primary-button" value="default">Add assignment</button></div></form></dialog>
+  <dialog id="classDialog"><form method="dialog" id="classForm"><div class="dialog-header"><div><p class="eyebrow">NEW CLASS</p><h2>Add a class</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div><label>Class name<input id="className" required placeholder="e.g. Biology 101"></label><label>Short code<input id="classCode" required maxlength="9" placeholder="BIO-101"></label><div class="dialog-actions"><button class="outline-button" value="cancel">Cancel</button><button class="primary-button" value="default">Add class</button></div></form></dialog>
+  <div class="toast" id="toast" role="status"></div><script src="app.js"></script>
+</body>
+</html>
